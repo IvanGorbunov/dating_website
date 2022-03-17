@@ -1,4 +1,5 @@
-
+from django.conf import settings
+from django.core.mail import send_mail
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 from rest_framework.viewsets import ModelViewSet
@@ -7,7 +8,7 @@ from django.test import override_settings
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
-from clients.models import User
+from clients.models import User, UserLike
 
 from django.utils.timezone import now as tz_now
 
@@ -80,3 +81,28 @@ class WithLoginTestCase(TestCaseBase):
         token, _ = Token.objects.get_or_create(user=user)
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 
+
+def set_like(liked_user_id, current_user):
+    # найдем/установим лайк
+    users_like = UserLike.objects.filter(user_id=liked_user_id, users_likes_id=current_user.id).first()
+    if not users_like:
+        UserLike.objects.create(user_id=liked_user_id, users_likes_id=current_user.id)
+
+    # найдем ответный лайк
+    reciprocal_like = UserLike.objects.filter(user_id=current_user.id, users_likes_id=liked_user_id).first()
+    if reciprocal_like:
+        user = User.objects.filter(pk=liked_user_id).values('email', 'first_name', 'last_name')[:1][0]
+        if settings.EMAIL_HOST:
+            send_mail('Сайт знакомств',
+                      f'Вы понравились {current_user.first_name}! Почта участника: {current_user.email}',
+                      settings.EMAIL_FROM,
+                      user['email'],
+                      fail_silently=False)
+
+            send_mail('Сайт знакомств',
+                      f'Вы понравились {user["first_name"]}! Почта участника: {user["email"]}',
+                      settings.EMAIL_FROM,
+                      current_user.email,
+                      fail_silently=False)
+        return user["email"]
+    return True

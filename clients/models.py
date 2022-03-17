@@ -21,3 +21,11 @@ class User(AbstractUser):
         verbose_name_plural = 'Пользователи'
         ordering = ['-id']
 
+
+class UserLike(models.Model):
+    user = models.ForeignKey(User, verbose_name='Пользователь', related_name='likes', on_delete=models.CASCADE)
+    users_likes = models.ForeignKey(User, verbose_name='Лайк пользователя', related_name='users_likes', on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'Лайк пользователя'
+        verbose_name_plural = 'Лайки пользователей'

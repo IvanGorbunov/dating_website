@@ -1,9 +1,10 @@
 from django.contrib import admin
+from django.contrib.admin import ModelAdmin
 from django.contrib.auth.admin import UserAdmin
 
 from django.utils.translation import gettext_lazy as _
 
-from clients.models import User
+from clients.models import User, UserLike
 
 
 @admin.register(User)
@@ -43,3 +44,15 @@ class CustomUserAdmin(UserAdmin):
         'first_name',
         'last_name',
     )
+
+
+@admin.register(UserLike)
+class UserLikeAdmin(ModelAdmin):
+    verbose_name_plural = 'География'
+    list_display = (
+        'id',
+        'user',
+        'users_likes',
+    )
+    list_display_links = ('id',)
+
