@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'drf_yasg',
     'rest_framework',
     'rest_framework.authtoken',
     'clients',
@@ -164,3 +165,8 @@ EMAIL_FROM = env.str('EMAIL_FROM', '')
 # endregion
 
 GEOS_LIBRARY_PATH = env.bool('GEOS_LIBRARY_PATH', '')
+
+if DEBUG:
+        import socket
+        hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+        INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + ["127.0.0.1", "10.0.2.2"]
