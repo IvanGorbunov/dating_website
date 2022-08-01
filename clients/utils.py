@@ -1,5 +1,12 @@
+from smtplib import SMTPAuthenticationError
+
 from django.conf import settings
-from django.core.mail import send_mail
+from django.core.mail import send_mail, BadHeaderError
+from django.db.models import Q
+from django.http import HttpResponse
+from django_filters import CharFilter
+from django_filters.rest_framework import FilterSet
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 from rest_framework.viewsets import ModelViewSet
@@ -82,6 +89,20 @@ class WithLoginTestCase(TestCaseBase):
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 
 
+class SearchFilterSet(FilterSet):
+    search_fields = ()
+    search_method = 'icontains'
+    q = CharFilter(method='filter_search', help_text='Поиск')
+
+    def filter_search(self, queryset, name, value):
+        if value:
+            q_objects = Q()
+            for field in self.search_fields:
+                q_objects |= Q(**{f'{field}__{self.search_method}': value})
+            queryset = queryset.filter(q_objects)
+        return queryset.distinct()
+
+
 def set_like(liked_user_id, current_user):
     # найдем/установим лайк
     users_like = UserLike.objects.filter(user_id=liked_user_id, users_likes_id=current_user.id).first()
@@ -93,16 +114,37 @@ def set_like(liked_user_id, current_user):
     if reciprocal_like:
         user = User.objects.filter(pk=liked_user_id).values('email', 'first_name', 'last_name')[:1][0]
         if settings.EMAIL_HOST:
-            send_mail('Сайт знакомств',
-                      f'Вы понравились {current_user.first_name}! Почта участника: {current_user.email}',
-                      settings.EMAIL_FROM,
-                      user['email'],
-                      fail_silently=False)
-
-            send_mail('Сайт знакомств',
-                      f'Вы понравились {user["first_name"]}! Почта участника: {user["email"]}',
-                      settings.EMAIL_FROM,
-                      current_user.email,
-                      fail_silently=False)
+            # send_mail('Сайт знакомств',
+            #           f'Вы понравились {current_user.first_name}! Почта участника: {current_user.email}',
+            #           settings.EMAIL_FROM,
+            #           user['email'],
+            #           fail_silently=False)
+            #
+            # send_mail('Сайт знакомств',
+            #           f'Вы понравились {user["first_name"]}! Почта участника: {user["email"]}',
+            #           settings.EMAIL_FROM,
+            #           current_user.email,
+            #           fail_silently=False)
+            send_new_letter.delay(user['email'], 'Сайт знакомств',
+                            f'Вы понравились {current_user.first_name}! Почта участника: {current_user.email}')
+            send_new_letter.delay(current_user.email, 'Сайт знакомств',
+                            f'Вы понравились {user["first_name"]}! Почта участника: {user["email"]}')
         return user["email"]
     return True
+
+
+def send_new_letter(email: str, theme: str, message: str):
+    try:
+        send_mail(
+            theme,
+            message,
+            settings.EMAIL_HOST_USER,
+            [email],
+            fail_silently=False,
+        )
+    except SMTPAuthenticationError:
+        raise AuthenticationFailed()
+    except BadHeaderError:
+        return HttpResponse('Invalid header found.')
+    except Exception as e:
+        return "Error: unable to send email due to" + e

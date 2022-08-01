@@ -48,6 +48,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+
+    'drf_yasg',
+
     'clients',
 ]
 
@@ -86,7 +89,14 @@ WSGI_APPLICATION = 'meeting_website.wsgi.application'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
-    'default': env.db()
+    'default': {
+        'ENGINE': env.str('SQL_ENGINE', 'django.db.backends.sqlite3'),
+        'NAME': env.str('SQL_DATABASE', os.path.join(BASE_DIR, "db.sqlite3")),
+        'USER': env.str('SQL_USER', 'user'),
+        'PASSWORD': env.str('SQL_PASSWORD', 'password'),
+        'HOST': env.str('SQL_HOST', 'localhost'),
+        'PORT': env.str('SQL_PORT', '5432'),
+    }
 }
 
 # region REST
@@ -97,8 +107,10 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.permissions.IsAdminUser',
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
     ],
 }
 # endregion
@@ -153,14 +165,34 @@ MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# region email
+# region SMTP
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_TLS = env.str('EMAIL_USE_TLS', False)
 EMAIL_HOST = env.str('EMAIL_HOST', '')
 EMAIL_HOST_USER = env.str('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = env.str('EMAIL_HOST_PASSWORD', '')
-EMAIL_PORT = env.str('EMAIL_PORT', '')
-EMAIL_USE_TLS = env.str('EMAIL_USE_TLS', '')
-EMAIL_FROM = env.str('EMAIL_FROM', '')
+EMAIL_PORT = env.str('EMAIL_PORT', 0)
+# endregion
+
+# region Redis
+# BROKER_URL = 'redis://redis:6379/0' #env.str('BROKER_URL', 'redis://redis:6379')
+REDIS_HOST = env.str('REDIS_HOST', 'redis')
+REDIS_PORT = env.str('REDIS_PORT', '6379')
+# endregion
+
+# region Celery
+CELERY_BROKER_URL = 'redis://redis:6381/0' #f'redis://{REDIS_HOST}:{REDIS_PORT}/0'
+CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
+CELERY_RESULT_BACKEND = 'redis://redis:6381/0' #f'redis://{REDIS_HOST}:{REDIS_PORT}/0'
+CELERY_ACCEPT_CONTENT = env.list('CELERY_ACCEPT_CONTENT')
+CELERY_TASK_SERIALIZER = env.str('CELERY_TASK_SERIALIZER', '')
+CELERY_RESULT_SERIALIZER = env.str('CELERY_RESULT_SERIALIZER', '')
+CELERY_TIMEZONE = env.str('CELERY_TIMEZONE', '')
 # endregion
 
 GEOS_LIBRARY_PATH = env.bool('GEOS_LIBRARY_PATH', '')
+
+if DEBUG:
+    import socket
+    hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+    INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + ["127.0.0.1", "10.0.2.2"]

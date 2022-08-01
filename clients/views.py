@@ -1,14 +1,19 @@
 from rest_framework import status
 from rest_framework.response import Response
 
+from clients.filters import UserFilter
 from clients.models import User
-from clients.serializers import UserDetailSerializer
+from clients.serializers import UserDetailSerializer, UserListSerializer
 from clients.utils import MultiSerializerViewSet, set_like
 
 
 class UserViewSet(MultiSerializerViewSet):
     queryset = User.objects.all()
+    filtersets = {
+        'list': UserFilter,
+    }
     serializers = {
+        'list': UserListSerializer,
         'create': UserDetailSerializer,
     }
 

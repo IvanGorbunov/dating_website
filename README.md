@@ -28,3 +28,36 @@ https://en.wikipedia.org/wiki/Great-circle_distance
 
 1. Аккуратный код
 1. Соблюдение PEP8 (Pycodestyle)
+
+## Установка и запуск:
+1. Клонировать репозиторий:
+   ```bash
+   git clone 
+   ```
+2. Создать и заполнить файл`.env` по шаблону `/DRF_blog/.env.template`. Файл`.env` дожен находится в одной директории с `settings.py`
+3. Запустить контейнеры docker:
+   ```bash
+   docker-compose up -d --build
+   ```
+4. Выполинть миграции:
+   
+   ```bash
+   docker-compose run --rm web sh -c "python3 manage.py migrate"
+   ```
+   
+5. Создать суперпользователя:
+   
+   ```bash
+   docker-compose run --rm web sh -c "python3 manage.py createsuperuser"
+   ```
+   
+6. Собрать статические файлы:
+   
+   ```bash
+   docker-compose run --rm web sh -c "python3 manage.py collectstatic"
+   ```
+
+7. Список эндпоинтов:
+   ```angular2html
+   http://127.0.0.1:8011/swagger/ - документация к API
+   ```
