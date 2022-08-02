@@ -35,32 +35,29 @@ https://en.wikipedia.org/wiki/Great-circle_distance
    git clone 
    ```
 2. Создать и заполнить файл`.env` по шаблону `/DRF_blog/.env.template`. Файл`.env` дожен находится в одной директории с `settings.py`
-3. Установить витуальное окружение для проекта `venv` в директории проекта:
-    ```bash
-    python3 -m venv venv
-    ```
-4. Активировать виртуальное окружение:
-   - для Linux: 
-       ```bash
-       source venv/bin/activate
-       ```
-   - для Windows:
-       ```bash
-       .\venv\Scripts\activate.ps1
-       ```
-5. Установить зависимости из `requirements.txt`:
-    ```bash
-    pip install -r requirements.txt
-    ```
-6. Выполнить миграции:
-    ```bash
-    python3 manage.py migrate
-    ```
-7. Запустить сервер:
-    ```bash
-    python3 manage.py runserver
-    ```
-8. Список эндпоинтов:
-   ```angular2html
-   http://127.0.0.1:8000/swagger/ - документация к API
+
+3. Запустить контейнеры docker:
+   ```bash
+   docker-compose up -d --build
    ```
+4. Выполинть миграции:
+   
+   ```bash
+   docker-compose run --rm web sh -c "python3 manage.py migrate"
+   ```
+   
+5. Создать суперпользователя:
+   
+   ```bash
+   docker-compose run --rm web sh -c "python3 manage.py createsuperuser"
+   ```
+   
+6. Собрать статические файлы:
+   
+   ```bash
+   docker-compose run --rm web sh -c "python3 manage.py collectstatic"
+   ```
+
+7. Список эндпоинтов:
+   ```angular2html
+   http://127.0.0.1:8011/swagger/ - документация к API
