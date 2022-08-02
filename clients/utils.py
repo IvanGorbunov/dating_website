@@ -1,12 +1,7 @@
-from smtplib import SMTPAuthenticationError
-
 from django.conf import settings
-from django.core.mail import send_mail, BadHeaderError
 from django.db.models import Q
-from django.http import HttpResponse
 from django_filters import CharFilter
 from django_filters.rest_framework import FilterSet
-from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 from rest_framework.viewsets import ModelViewSet
@@ -18,6 +13,8 @@ from rest_framework.test import APITestCase
 from clients.models import User, UserLike
 
 from django.utils.timezone import now as tz_now
+
+from .tasks import send_new_email
 
 
 def generate_uniq_code():
@@ -114,26 +111,9 @@ def set_like(liked_user_id, current_user):
     if reciprocal_like:
         user = User.objects.filter(pk=liked_user_id).values('email', 'first_name', 'last_name')[:1][0]
         if settings.EMAIL_HOST:
-            send_new_letter.delay(user['email'], 'Сайт знакомств',
+            send_new_email.delay(user['email'], 'Сайт знакомств',
                             f'Вы понравились {current_user.first_name}! Почта участника: {current_user.email}')
-            send_new_letter.delay(current_user.email, 'Сайт знакомств',
+            send_new_email.delay(current_user.email, 'Сайт знакомств',
                             f'Вы понравились {user["first_name"]}! Почта участника: {user["email"]}')
         return user["email"]
     return True
-
-
-def send_new_letter(email: str, theme: str, message: str):
-    try:
-        send_mail(
-            theme,
-            message,
-            settings.EMAIL_HOST_USER,
-            [email],
-            fail_silently=False,
-        )
-    except SMTPAuthenticationError:
-        raise AuthenticationFailed()
-    except BadHeaderError:
-        return HttpResponse('Invalid header found.')
-    except Exception as e:
-        return "Error: unable to send email due to" + e

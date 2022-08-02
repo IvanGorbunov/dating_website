@@ -1,6 +1,5 @@
+from clients.send_mail import send_new_letter
 from meeting_website.celery import app
-
-from .utils import send_new_letter
 
 
 @app.task
