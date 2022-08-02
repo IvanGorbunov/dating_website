@@ -117,3 +117,17 @@ def set_like(liked_user_id, current_user):
                             f'Вы понравились {user["first_name"]}! Почта участника: {user["email"]}')
         return user["email"]
     return True
+
+
+class SearchFilterSet(FilterSet):
+    search_fields = ()
+    search_method = 'icontains'
+    q = CharFilter(method='filter_search', help_text='Поиск')
+
+    def filter_search(self, queryset, name, value):
+        if value:
+            q_objects = Q()
+            for field in self.search_fields:
+                q_objects |= Q(**{f'{field}__{self.search_method}': value})
+            queryset = queryset.filter(q_objects)
+        return queryset.distinct()

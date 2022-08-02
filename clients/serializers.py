@@ -42,3 +42,18 @@ class UserDetailSerializer(serializers.ModelSerializer):
             result = add_watermark(img, watermark)
             result.save(user.avatar.path)
         return user
+
+
+class UserListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'username',
+            'password',
+            'first_name',
+            'last_name',
+            'email',
+            'gender',
+            'avatar',
+        )

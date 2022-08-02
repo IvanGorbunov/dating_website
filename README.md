@@ -35,6 +35,7 @@ https://en.wikipedia.org/wiki/Great-circle_distance
    git clone 
    ```
 2. Создать и заполнить файл`.env` по шаблону `/DRF_blog/.env.template`. Файл`.env` дожен находится в одной директории с `settings.py`
+
 3. Запустить контейнеры docker:
    ```bash
    docker-compose up -d --build
@@ -60,4 +61,3 @@ https://en.wikipedia.org/wiki/Great-circle_distance
 7. Список эндпоинтов:
    ```angular2html
    http://127.0.0.1:8011/swagger/ - документация к API
-   ```
