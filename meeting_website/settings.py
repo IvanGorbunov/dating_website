@@ -175,15 +175,14 @@ EMAIL_PORT = env.str('EMAIL_PORT', 0)
 # endregion
 
 # region Redis
-# BROKER_URL = 'redis://redis:6379/0' #env.str('BROKER_URL', 'redis://redis:6379')
 REDIS_HOST = env.str('REDIS_HOST', 'redis')
 REDIS_PORT = env.str('REDIS_PORT', '6379')
 # endregion
 
 # region Celery
-CELERY_BROKER_URL = 'redis://redis:6381/0' #f'redis://{REDIS_HOST}:{REDIS_PORT}/0'
+CELERY_BROKER_URL = 'redis://redis:6381/0'
 CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
-CELERY_RESULT_BACKEND = 'redis://redis:6381/0' #f'redis://{REDIS_HOST}:{REDIS_PORT}/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6381/0'
 CELERY_ACCEPT_CONTENT = env.list('CELERY_ACCEPT_CONTENT')
 CELERY_TASK_SERIALIZER = env.str('CELERY_TASK_SERIALIZER', '')
 CELERY_RESULT_SERIALIZER = env.str('CELERY_RESULT_SERIALIZER', '')

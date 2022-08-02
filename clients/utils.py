@@ -114,17 +114,6 @@ def set_like(liked_user_id, current_user):
     if reciprocal_like:
         user = User.objects.filter(pk=liked_user_id).values('email', 'first_name', 'last_name')[:1][0]
         if settings.EMAIL_HOST:
-            # send_mail('Сайт знакомств',
-            #           f'Вы понравились {current_user.first_name}! Почта участника: {current_user.email}',
-            #           settings.EMAIL_FROM,
-            #           user['email'],
-            #           fail_silently=False)
-            #
-            # send_mail('Сайт знакомств',
-            #           f'Вы понравились {user["first_name"]}! Почта участника: {user["email"]}',
-            #           settings.EMAIL_FROM,
-            #           current_user.email,
-            #           fail_silently=False)
             send_new_letter.delay(user['email'], 'Сайт знакомств',
                             f'Вы понравились {current_user.first_name}! Почта участника: {current_user.email}')
             send_new_letter.delay(current_user.email, 'Сайт знакомств',
