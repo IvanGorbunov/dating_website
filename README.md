@@ -1,63 +1,54 @@
-# Решение предварительной тестовой задачи для собеседования
+# Web-site for dating
 
-## Задача:
-### Общая идея: 
+## Main task:
 
-    пишем бекэнд для сайта (приложения) знакомств.
+   Create backend for dating web-site.
 
-### Как работаем:
+### Tasks:
 
-    Каждый пункт задачи - отдельный коммит. После выполнения каждого пункта пушим коммит в проект:
-    git add .
-    git commit -m "Сделал то-то и то-то"
-    git push origin {ветка}
-    После завершения ссылку на все коммиты кидаем в общий чат.
+1. Create a participant model. The participant must have an avatar, gender, first and last name, mail.
+2. Create a new member registration endpoint: `/api/clients/create`.
+3. When registering a new participant, it is necessary to process his avatar: put a watermark on it.
+4. Create an evaluation endpoint by a member of another member: `/api/clients/{id}/match`. In the event that mutual sympathy arises, then we issue a mail to the client in response and send it to the mail of the participants: `“You liked <name>! Participant's mail: <mail>"`.
+5. Create a member list endpoint: `/api/list`. It should be possible to filter the list by gender, first name, last name.
+6. Implement the definition of the distance between the participants. Add longitude and latitude fields. Add an additional filter to the list api that shows participants within a given distance relative to an authorized user.
 
-### Задачи:
+## Installation and run:
 
-1. Создать модель участников. У участника должна быть аватарка, пол, имя и фамилия, почта.
-1. Создать эндпоинт регистрации нового участника: /api/clients/create (не забываем о пароле и совместимости с авторизацией модели участника).
-1. При регистрации нового участника необходимо обработать его аватарку: наложить на него водяной знак (в качестве водяного знака можете взять любую картинку).
-1. Создать эндпоинт оценивания участником другого участника: /api/clients/{id}/match. В случае, если возникает взаимная симпатия, то ответом выдаем почту клиенту и отправляем на почты участников: «Вы понравились <имя>! Почта участника: <почта>».
-1. Создать эндпоинт списка участников: /api/list. Должна быть возможность фильтрации списка по полу, имени, фамилии. Советую использовать библиотеку Django-filters.
-1. Реализовать определение дистанции между участниками. Добавить поля долготы и широты. В api списка добавить дополнительный фильтр, который показывает участников в пределах заданной дистанции относительно авторизованного пользователя. Не забывайте об оптимизации запросов к базе данных
-https://en.wikipedia.org/wiki/Great-circle_distance
-1. Задеплоить проект на любом удобном для вас хостинге, сервисах PaaS (Heroku) и т.п. Должна быть возможность просмотреть реализацию всех задач. Если есть какие-то особенности по тестированию, написать в Readme. Там же оставить ссылку/ссылки на АПИ проекта
+1. Clone the repository:
 
-### Приветствуется:
-
-1. Аккуратный код
-1. Соблюдение PEP8 (Pycodestyle)
-
-## Установка и запуск:
-1. Клонировать репозиторий:
    ```bash
    git clone 
    ```
-2. Создать и заполнить файл`.env` по шаблону `/DRF_blog/.env.template`. Файл`.env` дожен находится в одной директории с `settings.py`
 
-3. Запустить контейнеры docker:
+1. Create and fill up a `.env` file according to the template `/DRF_blog/.env.template`. The `.env` file must be in the same directory as `settings.py`
+
+1. Run containers in docker:
+
    ```bash
    docker-compose up -d --build
    ```
-4. Выполинть миграции:
-   
+
+1. Run a migration:
+
    ```bash
    docker-compose run --rm web sh -c "python3 manage.py migrate"
    ```
-   
-5. Создать суперпользователя:
-   
+
+1. Create a superuser:
+
    ```bash
    docker-compose run --rm web sh -c "python3 manage.py createsuperuser"
    ```
-   
-6. Собрать статические файлы:
-   
+  
+1. Collect static files:
+
    ```bash
    docker-compose run --rm web sh -c "python3 manage.py collectstatic"
    ```
 
-7. Список эндпоинтов:
-   ```angular2html
-   http://127.0.0.1:8011/swagger/ - документация к API
+1. Get a list of endpoints by url:
+
+   ```html
+   http://127.0.0.1:8011/swagger/ - documentation for API
+   ```
